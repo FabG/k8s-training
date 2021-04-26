@@ -61,3 +61,96 @@ providing a powerful user experience to manage containers. Now several tools suc
 - All of these actions require flexible, scalable, and easy-to-manage network and storage. As containers are launched on any worker node, the network must join the resource to other containers, while still keeping the traffic secure from others. We also need a storage structure which provides and keeps or recycles storage in a seamless manner.
 
   - *Notes*: Would users notice if you ran **Chaos Monkey**, which terminates any container randomly? If so you may have more work making containers and applications more decoupled and transient.
+
+  ### Kubernetes architecture
+
+  - To quickly demystify Kubernetes, let’s have a look at a Kubernetes architecture graphic, which shows a high-level architecture
+  diagram of the system components.:
+
+  ![k8s-arch](../images/K8s-architecture.png)
+
+- In its simplest form, Kubernetes is made of one or more central managers (aka `master`) and `worker` nodes (we will see in a follow-on chapter how you can actually run everything on a single node for testing purposes). The manager runs an API server, a scheduler, various operators and a datastore to keep the state of the cluster, container settings, and the networking configuration.
+- Kubernetes exposes an API via the API server: you can communicate with the API using a local client called `kubectl` or you can write your own client. The kube-scheduler sees the API requests for running a new container and finds a
+suitable node to run that container. Each node in the cluster runs two containers: `kubelet` and `kube-proxy`. The kubelet container receives spec information for container configuration, downloads and manages any necessary resources and works with the container engine on the local node to ensure the container runs or is restarted upon failure. The kubeproxy container creates and manages local firewall rules and networking configuration to expose containers on the network.
+
+  - *Notes*: `operator`, also called `controller` or `watch-loop` - spec and status asked for over and over. Constantly making request to know what is the `spec` and what is the `status`. If spec and status don't match, I will change. For ex, we expect 2 to run, but we are 4 - kill 2. or maybe 1 only is running - start 1. `spec` and `status` are stored in `etcd`
+
+  - `etcd` - it's a DB that stores the state of the cluster. The one thing you cannot lose. Not for end user storage.
+
+  - `kube-apiserver` handles all API calls - it's the only pod which talks to `etcd`. While we can interact with it, usually in large companies, we leverage a pipeline to interact with it.
+
+  - `kube-controller-manager`: the "brain" where all the shipped operators run
+
+  - `kubelet` - a service, not a pod, run by systemctl, which mounts volumes, downloads stuff, checks network then tells Docker/Cri-o what to do. The kubelet agent is the heavy lifter for changes and configuration on worker nodes. It accepts the API calls for Pod specifications (a PodSpec is a JSON or YAML file that describes a pod). It will work to configure the local node until the specification has been met.
+
+  - `kube-proxy` - a pod which handles iptables and works with network plugin (calico)
+
+  - `Deployment` - an operator which watches replicaSets.
+
+  - `replicaSet` - an operator which ensures some number of replicas are running. A replica is a pod using the same podspec
+
+  - `pod` - one or more containers which share a single IP, access to storage, and a common network namespace. Containers in a Pod are started in parallel by default. There is only one IP address per Pod. While **Pods are often deployed with one application container in each**, a common reason to have multiple containers in a Pod is for logging. You may find the term `sidecar` for a container dedicated to performing a helper task, like handling logs and responding to requests, as the primary application container may have this ability. Pods, and other objects, can be created in several ways. They can be created by using a generator, which historically has changed with each release: `kubectl run newpod --image=nginx --generator=run-pod/v1`. Or they can be created and deleted using a properly formatted JSON or YAML file: `kubectl create -f newpod.yaml` and `kubectl delete -f newpod.yaml`
+
+  - `DaemonSet` - one pod per node, metrics, security, logging...
+
+  - `StatefulSet` - organized deployment of dissimilar pods - legacy app - F1 car on a tow truck
+
+  - `Job` - operator to run one or more pods, sometimes in parallel
+
+  - `Cronjob` - an operator which watches the job operator and the current time to the minute
+
+  - `service`, `endpoint`  - ip traffic to the pods ephemeral IP. Service operator watches the endpoint operator. The endpoint operator gets pod IPs and updates the service
+
+  - `kube-scheduler` - uses an algorithm to determine which node will host a Pod of containers.  It usually a pod-count but complex configuration can be done. Can use `taints and tolerations` - for example, using a strong `gpu` to taint a node. up to the pod spec via toleration to assign pods to particular nodes.
+
+  - `worker` nodes: run the `kubelet` and `kube-proxy` as ewll as container engine such as `Docker` or `cri-o`.
+  - Cluster-wide metrics is not quite fully mature, so Prometheus (https:/Prometheus.io) is also often deployed to gather metrics from nodes and perhaps some applications.
+
+  - `singe IP per pod`: A pod represents a group of co-located containers with some associated data volumes. All containers in a pod share the same network namespace. The diagram below shows a pod with two containers, MainApp and Logger, and two data volumes, made available under two mount points. Containers MainApp and Logger share the network namespace of a third container, known as the pause container. The pause container is used to get an IP address, then all the containers in the pod will use its network namespace. You won’t see this container from the Kubernetes perspective, but you would by running sudo docker ps. The volumes are shown for completeness and will be discussed later.
+![pod](../images/pod.png)
+
+  - `networking setup`: A detailed explanation about the Kubernetes networking model can be seen on the Cluster Networking page in the Kubernetes documentation at https://kubernetes.io/docs/concepts/cluster-administration/networking. If you have experience deploying virtual machines (VMs) based on IaaS solutions, this will sound familiar. The only caveat is that, in Kubernetes, the lowest compute unit is not a `container`, but what we call a `pod`. A pod is a group of co-located containers that share the same IP address. From a networking perspective, a pod can be seen as a virtual machine of physical hosts. The network needs to assign IP addresses to pods, and needs to provide traffic routes between all pods on any nodes.
+  - Kubernetes expects the network configuration to enable pod-to-pod communications to be available; it will not do it for you. Pods are assigned an IP address prior to application containers being started. The service object is used to connect pods within the network using ClusterIP addresses, from outside of the cluster using NodePort addresses, and using a load balancer if configured with a LoadBalancer service.
+  - A `ClusterIP` is used for traffic within the cluster. A `NodePort` first creates a ClusterIP then associates a port of the node to that new ClusterIP. If you create a LoadBalancer service it will first create a ClusterIP, then a NodePort and then make an asynchronous request for an external load balancer. If one is not configured to respond the EXTERNAL-IP will remain in pending state for the life of the service.
+![service-relationships](../images/Service-relationships.png)
+
+  - *Notes*:
+  - `ClusterIP` - inside the cluster more permenant IP
+  - `NodePort` - creates a ClusterIP, then associates a high number port to it
+  - `LoadBalancer` - creates a NodePort, async request to USE a loadbalancer. Does not create one
+
+
+- An `Ingress Controller` or a service mesh like `Istio` can also be used to connect traffic to a pod. This image shows a multi-container pod, two services with one for internal traffic only, and a an ingress controller. The sidecar container, acting as a logger, is shown writing out storage, just to show a more complete pod. The pause container, which is only used to retrieve the namespace and IP address is also shown.
+![pod-service](../images/pod-service.png)
+
+
+- Another possible view of a cluster with multiple pods and services. This graphic shows the `Calico` pod running on each node and communicating with the BIRD protocol. There are also three `ClusterIP` services and on `LoadBalancer` service trying to show how the front end may communicate with other pods. The pods could have been on any worker, and are shown on one only as an example. Note this graphic is not an expansion of the previous graphic.
+
+![other example](../images/pod-service2.png)
+Tim Hockin, one of the lead Kubernetes developers, has created a very useful slide deck to understand the Kubernetes
+networking An Illustrated Guide to Kubernetes Networking at
+https://speakerdeck.com/thockin/illustrated-guide-to-kubernetes-networking
+
+
+
+  - `Pod-to-pod Communication` : While a CNI plugin can be used to configure the network of a pod and provide a single IP per pod, CNI does not help
+you with pod-to-pod communication across nodes. The early requirement from Kubernetes was the following:
+   – All pods can communicate with each other across nodes.
+   – All nodes can communicate with all pods.
+   – No Network Address Translation (NAT).
+Basically, all IPs involved (nodes and pods) are routable without NAT. This can be achieved at the physical network
+infrastructure if you have access to it (e.g. GKE). Or, this can be achieved with a software defined overlay with solutions like:
+– Weave: https://www.weave.works/oss/net/
+
+– Flannel: https://github.com/coreos/flannel#flannel
+
+– Calico: https://www.projectcalico.org/
+
+– Romana: https://romana.io/
+Most network plugins now support the use of `Network Policies` which act as an internal firewall, limiting ingress and egress traffic.
+See the cluster networking documentation page (https://kubernetes.io/docs/concepts/cluster-administration/networking/) or the list of networking add-ons (https://kubernetes.io/docs/concepts/cluster-administration/addons/ for a more complete list.
+
+ - *Notes*:  Calico is great for everything but very very large clusters. In the 4 to 5k nodes range, amount of traffic becomes in the way. For really large cluster, use a different plugin.
+
+ - `Cloud Native Computing Foundation`: Kubernetes is an open source software with an Apache license. Google donated Kubernetes to a newly formed collaborative project within the Linux Foundation in July 2015, when Kubernetes reached the v1.0 release. This project is known as the **Cloud Native Computing Foundation (CNCF).**
+ 
