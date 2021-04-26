@@ -35,9 +35,30 @@ $ ./ready-for.sh LFD5461
 $ ./ready-for.sh --install LFD5461
 ```
 
+
+### Chapters
+
+#### 1. Kubernetes Architecture
+In this chapter we are going to cover a little bit of the history of Kubernetes. This helps to understand the why things are
+where they are. Then we’ll talk about `master` nodes and the main agents that work to make Kubernetes what it is. We’ll also talk about `minion` or `worker` nodes. These are nodes that use API calls back to the master node to understand what the configuration should be, and report back status.
+
+We’ll also talk about `CNI network plugin configuration`, which continues to be the future of Kubernetes networking. And we’ll cover some common terms so as you learn more about Kubernetes, you’ll understand major components and how they work with the other components in our decoupled and transient environment.
+
+See [Course Notes - chapter1-k8s-architecture.md](course-notes/chapter1-k8s-architecture.md)
+
+
+
+
+### Getting ready for exam
+- registration -needed to get certs for exam, and access to online class
+ https://trainingportal.linuxfoundation.org/redeem
+ code:  `lfd5461capitolone26april21`
+
+
 ### Resources
  - [LFD5461 Course (pdf)](course/LFD5461-WM_V1.20.pdf)
  - Keys for accessing the Linux Foundation linux hosts and run labs/k8s: see keys folder.
  - Instructor: Tim Serewicz / tim@serewicz.com
  - Company: [Linux Foundation](https://www.linuxfoundation.org/)
  - Training Manager: Kevlin Husser / kevlin@linuxfoundation.org / (925) 216-2955
+ - [Large-scale cluster management at Google with Borg (paper)](https://research.google/pubs/pub43438/)
