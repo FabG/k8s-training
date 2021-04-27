@@ -1,4 +1,4 @@
-# lab 2
+# K8s lab 2
 This lab is related to the K8s course chapter 3 - Build (starting page 39)
 
 *Notes*: you can use the `--dry-un` parameter when running `kubectl` commands to see what would the command return. This is particularly convenient when running `delete` command.
