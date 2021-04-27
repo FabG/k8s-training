@@ -1,5 +1,7 @@
-# Exercise 2.1 lab
+# K8s Lab 1
+This lab is related to Chapter 2 - Kubernetes Architecture 
 
+This covers Exercise 2.1 to 2.6 (p29 - p45)
 We will create a two-node Ubuntu 18.04 cluster. Using two nodes allows an understanding of some issues and configurations found in a production environment. Currently 2 vCPU and 8G of memory allows for quick labs. Other Linux distributions should work in a very similar manner, but have not been tested.
 
 *Important Notes*: Regardless of the platform used (VirtualBox, VMWare, AWS, GCE or even bare metal) please remember that security software like SELinux, AppArmor, and firewall configurations can prevent the labs from working. While not something to do in production consider disabling the firewall and security software.

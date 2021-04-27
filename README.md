@@ -46,6 +46,12 @@ We’ll also talk about `CNI network plugin configuration`, which continues to b
 
 See [Course Notes - chapter1-k8s-architecture.md](course-notes/chapter1-k8s-architecture.md)
 
+#### 2. Build
+In this chapter, we are going to deploy our new Python application into our Kubernetes cluster. We’ll first containerize it, using Docker commands, then create and use our own local registry. After testing that the registry is available to all of our nodes, we
+will deploy our application in a multi-container pod. In keeping with the ideas of decoupled applications that are transient, we will also use `readinessProbes`, to make sure that the application is fully running prior to accepting traffic from the cluster, and then, `livenessProbes`, to ensure that the container and the application continues to run in a healthy state, and `startupProbes` to allow for a slow-starting application.
+See [Course Notes - chapter 2 - build.md](course-notes/chapter2-build.md)
+
+
 
 
 
