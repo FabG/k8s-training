@@ -44,14 +44,58 @@ where they are. Then we’ll talk about `master` nodes and the main agents that 
 
 We’ll also talk about `CNI network plugin configuration`, which continues to be the future of Kubernetes networking. And we’ll cover some common terms so as you learn more about Kubernetes, you’ll understand major components and how they work with the other components in our decoupled and transient environment.
 
-See [Course Notes - chapter1-k8s-architecture.md](course-notes/chapter1-k8s-architecture.md)
+- See [Course Notes - chapter1-k8s-architecture](course-notes/chapter1-k8s-architecture.md)
+- See [Lab - chapter 1 - k8s-architecture](labs/lab-1/lab_1.md)
+
 
 #### 2. Build
 In this chapter, we are going to deploy our new Python application into our Kubernetes cluster. We’ll first containerize it, using Docker commands, then create and use our own local registry. After testing that the registry is available to all of our nodes, we
 will deploy our application in a multi-container pod. In keeping with the ideas of decoupled applications that are transient, we will also use `readinessProbes`, to make sure that the application is fully running prior to accepting traffic from the cluster, and then, `livenessProbes`, to ensure that the container and the application continues to run in a healthy state, and `startupProbes` to allow for a slow-starting application.
-See [Course Notes - chapter 2 - build.md](course-notes/chapter2-build.md)
+- See [Course Notes - chapter 2 - build](course-notes/chapter2-build.md)
+- See [Lab - chapter 2 - build](labs/lab-2/lab_2.md)
 
 
+#### 3. APIs and Access
+- See [Course Notes - chapter 3 - apis-access](course-notes/chapter3-apis-access.md)
+- See [Lab - chapter 3 - api-access](labs/lab-3/lab_3.md)
+
+
+#### 4. API Objects
+- See [Course Notes - chapter 4 - api-objects](course-notes/chapter4-api-objects.md)
+- See [Lab - chapter 4 - api-objects](labs/lab-4/lab_4.md)
+
+
+#### 5. Design
+In this chapter, we are going to talk about resource requirements for our applications, and the ability to set limits for CPU,
+memory and storage in the root filesystem of the node. We’re also going to talk about containers that can assist our primary
+application, such as a sidecar, which is typically something that enhances the primary application. For example, if our application
+does not include logging, we can add a second container to the pod, to handle logging on our behalf. An adapter
+container might conform the traffic to match the other applications or needs of our cluster. This allows for full flexibility for the
+primary application, to remain generating the data that it does, and not have to be modified to fit that particular cluster. There
+is also an ambassador container, which is our representation to the outside world. It can act as a proxy then, so that perhaps
+I might want to split inbound traffic: if it’s a read, it goes to one container, and for write, it goes to a different container, allowing
+me to optimize my environment and my application. We’ll also consider other application design concepts, that can be helpful
+in the planning stage for the deployment of your application. We’ll then finish by talking about jobs, whether it’s a batch-like
+job that will run a container once and be done, or cron jobs, which will run a container on a regular basis on our behalf.
+
+- See [Course Notes - chapter 5 - design](course-notes/chapter5-design.md)
+- See [Lab - chapter 5 - design](labs/lab-5/lab_5.md)
+
+
+#### 6. Deployment Configuration
+In this chapter, we are going to cover some of the typical tasks necessary for full application deployment inside of Kubernetes.
+We will begin by talking about attaching storage to our containers. By default, storage would only last as long as the container
+using it. Through the use of Persistent Volumes and Persistent Volume Claims, we can attach storage such that it lives longer
+than the container and/or the pod the container runs inside of. We’ll cover adding dynamic storage, which might be made
+available from a cloud provider, and we will talk about ConfigMaps and secrets. These are ways of attaching configuration
+information into our containers in a flexible manner. They are ingested in almost the exact same way. The difference between
+them, currently, is a secret is encoded. There are plans for it to be encrypted in the future. We will also talk about how do we
+update our applications. We can do a rolling update, where there’s always some containers available for response to client
+requests, or update all of them at once. We’ll also cover how to roll back an application to a previous version, looking at our
+entire history of updates, and choosing a particular one.
+
+- See [Course Notes - chapter 6 - deployment configuration](course-notes/chapter6-deployment-configuration.md)
+- See [Lab - chapter 6 - design](labs/lab-6/lab_6.md)
 
 
 
