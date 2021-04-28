@@ -98,6 +98,16 @@ entire history of updates, and choosing a particular one.
 - See [Lab - chapter 6 - design](labs/lab-6/lab_6.md)
 
 
+#### 7. Custom Resource Definition
+
+We have been working with built-in resources, or API endpoints. The flexibility of Kubernetes allows for **dynamic addition of
+new resources** as well. Once these Custom Resources have been added the objects can be created and accessed using
+standard calls and commands like `kubectl`.
+
+- See [Course Notes - chapter 7 - deployment configuration](course-notes/chapter7-custom-resource-definition.md)
+- See [Lab - chapter 7 - design](labs/lab-7/lab_7.md)
+
+
 
 ### Getting ready for exam
 - registration -needed to get certs for exam, and access to online class
