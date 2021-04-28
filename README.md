@@ -108,6 +108,17 @@ standard calls and commands like `kubectl`.
 - See [Lab - chapter 7 - design](labs/lab-7/lab_7.md)
 
 
+#### 8. Scheduling
+
+The larger and more diverse a Kubernetes deployment becomes the more administration of scheduling can be important. The
+`kube-scheduler` determines which nodes will run a Pod.
+Users can set the priority of a pod, which will allow preemption of lower priority pods. The eviction of lower priority pods would
+then allow the higher priority pod to be scheduled.
+
+- See [Course Notes - chapter 8 - scheduling](course-notes/chapter8-scheduling.md)
+- See [Lab - chapter 8 - design](labs/lab-8/lab_8.md)
+
+
 
 ### Getting ready for exam
 - registration -needed to get certs for exam, and access to online class
