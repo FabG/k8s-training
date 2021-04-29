@@ -95,7 +95,7 @@ requests, or update all of them at once. We’ll also cover how to roll back an 
 entire history of updates, and choosing a particular one.
 
 - See [Course Notes - chapter 6 - deployment configuration](course-notes/chapter6-deployment-configuration.md)
-- See [Lab - chapter 6 - design](labs/lab-6/lab_6.md)
+- See [Lab - chapter 6 - deployment configuration](labs/lab-6/lab_6.md)
 
 
 #### 7. Custom Resource Definition
@@ -105,7 +105,7 @@ new resources** as well. Once these Custom Resources have been added the objects
 standard calls and commands like `kubectl`.
 
 - See [Course Notes - chapter 7 - deployment configuration](course-notes/chapter7-custom-resource-definition.md)
-- See [Lab - chapter 7 - design](labs/lab-7/lab_7.md)
+- See [Lab - chapter 7 - deployment configuration](labs/lab-7/lab_7.md)
 
 
 #### 8. Scheduling
@@ -116,7 +116,21 @@ Users can set the priority of a pod, which will allow preemption of lower priori
 then allow the higher priority pod to be scheduled.
 
 - See [Course Notes - chapter 8 - scheduling](course-notes/chapter8-scheduling.md)
-- See [Lab - chapter 8 - design](labs/lab-8/lab_8.md)
+- See [Lab - chapter 8 - scheduling](labs/lab-8/lab_8.md)
+
+
+#### 8. Security
+In this chapter, we are going to talk about how an API call is ingested into the cluster. We will go through the details of the
+three different phases each call goes through. We’ll look at the different types of authentication that are available to us, and
+work with RBAC, which handles the authorization on our behalf. We’ll also configure pod policies. The use of a pod policy
+allows us to configure the details of what a container can do, and how processes run within that container.
+We’ll finish by understanding a network policy. If the network plugin honors a network policy, this allows you to isolate a pod
+from other pods in the environment. The default Kubernetes architecture says that all pods should be able to see all pods. So,
+this is a change from that historic approach. But, as we use it in a production environment, you may want to limit ingress
+
+- See [Course Notes - chapter 8 - security](course-notes/chapter-security.md)
+- See [Lab - chapter 9 - security](labs/lab-9/lab_9.md)
+
 
 
 

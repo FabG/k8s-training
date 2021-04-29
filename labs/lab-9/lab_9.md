@@ -257,4 +257,261 @@ lrwxrwxrwx 1 root root 31 Apr 11 07:24 ..data -> ..4984_11_04_07_24_47.831222818
 /mysqlpassword $ exit
 ```
 
-See the reaminder of the exercises in the PDF 
+
+#### Exercise 10.3: Working with ServiceAccounts
+We can use ServiceAccounts to assign cluster roles, or the ability to use particular HTTP verbs. In this section we will create a new ServiceAccount and grant it access to view secrets.
+
+
+1. Begin by viewing secrets, both in the default namespace as well as all.
+```
+student@master:˜/app2$ cd
+student@master:˜$ kubectl get secrets
+NAME                  TYPE                                  DATA   AGE
+default-token-8t7gb   kubernetes.io/service-account-token   3      2d23h
+lfsecret              Opaque                                1      30m
+```
+
+```
+student@master:˜$ kubectl get secrets --all-namespaces
+NAMESPACE         NAME                                             TYPE                                  DATA   AGE
+default           default-token-8t7gb                              kubernetes.io/service-account-token   3      2d23h
+default           lfsecret                                         Opaque                                1      30m
+kube-node-lease   default-token-vn9hp                              kubernetes.io/service-account-token   3      2d23h
+kube-public       default-token-vv7z5                              kubernetes.io/service-account-token   3      2d23h
+kube-system       attachdetach-controller-token-xqgv2              kubernetes.io/service-account-token   3      2d23h
+kube-system       bootstrap-signer-token-rs2wd                     kubernetes.io/service-account-token   3      2d23h
+kube-system       calico-kube-controllers-token-hc56c              kubernetes.io/service-account-token   3      2d23h
+kube-system       calico-node-token-dzcmm                          kubernetes.io/service-account-token   3      2d23h
+kube-system       certificate-controller-token-rc29b               kubernetes.io/service-account-token   3      2d23h
+kube-system       clusterrole-aggregation-controller-token-8t6hv   kubernetes.io/service-account-token   3      2d23h
+kube-system       coredns-token-5rhj9                              kubernetes.io/service-account-token   3      2d23h
+kube-system       cronjob-controller-token-tmjx7                   kubernetes.io/service-account-token   3      2d23h
+kube-system       daemon-set-controller-token-5n4lm                kubernetes.io/service-account-token   3      2d23h
+kube-system       default-token-6r66x                              kubernetes.io/service-account-token   3      2d23h
+kube-system       deployment-controller-token-652m6                kubernetes.io/service-account-token   3      2d23h
+kube-system       disruption-controller-token-fq9c9                kubernetes.io/service-account-token   3      2d23h
+...
+```
+
+2. We can see that each agent uses a secret in order to interact with the API server. We will create a new ServiceAccount
+which will have access.
+```
+student@master:˜$ vim serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+ name: secret-access-sa
+```
+
+```
+student@master:˜$ kubectl create -f serviceaccount.yaml
+serviceaccount/secret-access-sa created
+student@master:˜$ kubectl get serviceaccounts
+NAME               SECRETS   AGE
+default            1         2d23h
+secret-access-sa   1         6s
+```
+
+3. 3. Now we will create a `ClusterRole` which will list the actual actions allowed cluster-wide. We will look at an existing role
+to see the syntax.
+```
+student@master:˜$ kubectl get clusterroles
+NAME                                                                   CREATED AT
+admin                                                                  2021-04-26T18:52:53Z
+calico-kube-controllers                                                2021-04-26T18:53:05Z
+calico-node                                                            2021-04-26T18:53:05Z
+cluster-admin                                                          2021-04-26T18:52:53Z
+edit                                                                   2021-04-26T18:52:53Z
+kubeadm:get-nodes                                                      2021-04-26T18:52:54Z
+system:aggregate-to-admin                                              2021-04-26T18:52:53Z
+system:aggregate-to-edit                                               2021-04-26T18:52:53Z
+system:aggregate-to-view                                               2021-04-26T18:52:53Z
+...
+```
+
+4. View the details for the admin and compare it to the cluster-admin. The admin has particular actions allowed, but
+cluster-admin has the meta-character ’*’ allowing all actions.
+```
+student@master:˜$ kubectl get clusterroles admin -o yaml
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-admin: "true"
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+...
+- apiGroups:
+  - ""
+  resources:
+  - pods/attach
+  - pods/exec
+  - pods/portforward
+  - pods/proxy
+  - secrets
+  - services/proxy
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - impersonate
+...
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - localsubjectaccessreviews
+  verbs:
+  - create
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - rolebindings
+  - roles
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+```
+
+```
+student@master:˜$ kubectl get clusterroles cluster-admin -o yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  creationTimestamp: "2021-04-26T18:52:53Z"
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+...
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- nonResourceURLs:
+  - '*'
+  verbs:
+  - '*'
+
+```
+
+
+5. Using some of the output above, we will create our own file.
+```
+student@master:˜$ vim clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+ name: secret-access-cr
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+```
+
+6. Create and verify the new ClusterRole.
+```
+student@master:˜$ kubectl create -f clusterrole.yaml
+clusterrole.rbac.authorization.k8s.io/secret-access-cr created
+student@master:˜$ kubectl get clusterrole secret-access-cr -o yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: "2021-04-29T18:17:55Z"
+  managedFields:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:rules: {}
+    manager: kubectl-create
+    operation: Update
+    time: "2021-04-29T18:17:55Z"
+  name: secret-access-cr
+  resourceVersion: "338077"
+  uid: b1595517-a11e-4982-99fc-a22ecccc4283
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+```
+
+
+7. Now we bind the role to the account. Create another YAML file which uses roleRef::
+```
+student@master:˜$ vim rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+ name: secret-rb
+subjects:
+- kind: ServiceAccount
+  name: secret-access-sa
+roleRef:
+ kind: ClusterRole
+ name: secret-access-cr
+ apiGroup: rbac.authorization.k8s.io
+```
+
+8. Create the new RoleBinding and verify.
+```
+student@master:˜$ kubectl create -f rolebinding.yaml
+rolebinding.rbac.authorization.k8s.io/secret-rb created
+student@master:˜$ kubectl get rolebindings
+secret-rb   ClusterRole/secret-access-cr   22s
+```
+
+9. View the `secondapp` pod and grep for secret settings. Note that it uses the default settings.
+```
+student@master:˜$ kubectl describe pod secondapp |grep -i secret
+/var/run/secrets/kubernetes.io/serviceaccount from
+default-token-c4rdg (ro)
+Type: Secret (a volume populated by a Secret)
+SecretName: lfsecret
+Type: Secret (a volume populated by a Secret)
+SecretName: default-token-c4rdg
+```
+
+10. Edit the second.yaml file and add the use of the serviceAccount.
+```
+student@master:˜$ vim $HOME/app2/second.yaml
+....
+name: secondapp
+spec:
+serviceAccountName: secret-access-sa #<-- Add this line
+securityContext:
+runAsUser: 1000
+....
+```
+
+11. We will delete the secondapp pod if still running, then create it again. View what the secret is by default.
+```
+student@master:˜$ kubectl delete pod secondapp ; kubectl create -f $HOME/app2/second.yaml
+student@master:˜$ kubectl describe pod secondapp | grep -i secret
+/var/run/secrets/kubernetes.io/serviceaccount from
+secret-access-sa-token-wd7vm (ro)
+secret-access-sa-token-wd7vm:
+Type: Secret (a volume populated by a Secret)
+SecretName: secret-access-sa-token-wd7vm
+```
+
+See the remainder of the exercises in the PDF
