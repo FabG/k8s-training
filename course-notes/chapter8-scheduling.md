@@ -156,4 +156,4 @@ has problems.
 
 *Notes*: asking the instructor about our use case, to segregate compute for internal vs external jobs, he agreed that taints & tolerations is a good use.
 He also mentioned that if we had anything more complex (more envts to seggregate) to use affinity.
-*Notes*: `affinity` deals with `labels`, `taints` only deals with `toleration`. We could use affinity to seggregate the jobs running across our customers, each having its dedicated note. `requirednodeaffinity` is the label we would use,
+*Notes*: `affinity` deals with `labels`, `taints` only deals with `toleration`. We could use affinity to seggregate the jobs running across our customers, each having its dedicated note. `requirednodeaffinity` is the label we would use. This allows us to add nodes for a particular customer.

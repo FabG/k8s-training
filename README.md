@@ -119,7 +119,7 @@ then allow the higher priority pod to be scheduled.
 - See [Lab - chapter 8 - scheduling](labs/lab-8/lab_8.md)
 
 
-#### 8. Security
+#### 9. Security
 In this chapter, we are going to talk about how an API call is ingested into the cluster. We will go through the details of the
 three different phases each call goes through. We’ll look at the different types of authentication that are available to us, and
 work with RBAC, which handles the authorization on our behalf. We’ll also configure pod policies. The use of a pod policy
@@ -128,10 +128,55 @@ We’ll finish by understanding a network policy. If the network plugin honors a
 from other pods in the environment. The default Kubernetes architecture says that all pods should be able to see all pods. So,
 this is a change from that historic approach. But, as we use it in a production environment, you may want to limit ingress
 
-- See [Course Notes - chapter 8 - security](course-notes/chapter-security.md)
+- See [Course Notes - chapter 9 - security](course-notes/chapter9-security.md)
 - See [Lab - chapter 9 - security](labs/lab-9/lab_9.md)
 
+#### 10. Exposing Applications
+In this chapter, we are going to talk about exposing our applications using services. We’ll start by talking about a ClusterIP
+service. This allows us to expose our application inside of the cluster only. A NodePort will create a ClusterIP and then also,
+get a high number port from the node. This allows us then to expose our applications internally on a low number port, and
+externally, but only on a high number port. The use of a LoadBalancer first creates a NodePort on our behalf. The difference is
+it also sends an asynchronous request to a cloud provider to make use of a LoadBalancer. If we are not using a cloud provider,
+or if a load balancer is not available, it continues to run as a NodePort. The fourth service that we are going to discuss is
+called ExternalName. This is useful for handling requests to an outside DNS resource, instead of one inside of the cluster.
+This is helpful if you were in the process of moving your application from outside of the cluster inside. We’ll also discuss the
+configuration of an Ingress Controller. The two reasons that you might want to use an Ingress Controller is, for example, if
+you have thousands of services, having them independent can become difficult to manage, and wasteful of resources. You
+can then consolidate it to a single Ingress Controller. Or multiple Ingress Controllers if you want more flexibility. The second
+reason is an Ingress Controller allows you to expose a low numbered port to your application. Without that, you could get
+there, but you’d have to use iptables, which could become difficult and not terribly flexible to manage.
 
+
+- See [Course Notes - chapter 9 - exposing applications](course-notes/chapter10-exposing-applications.md)
+- See [Lab - chapter 10 - exposing applications](labs/lab-10/lab_10.md)
+
+#### 11 and 12: Monitoring, Logging and Troubleshooting
+
+Troubleshooting, which we’ll cover in this chapter, can be difficult in a distributed and decoupled environment like Kubernetes.
+We will cover the basic flow that can be used to diagnose and identify issues you may have. We do not have cluster-wide
+logging built-in into Kubernetes. So, we will talk about other projects you may want to implement, like Prometheus and Fluentd,
+that offer monitoring and logging in a cluster-wide sense. We will talk about agent logs locally, and node logs locally, as well.
+With conformance testing, we can ensure that the deployment of Kubernetes that we have chosen conforms to standards used
+in the community. We’ll also talk about cluster certification, which is a way of knowing that the Kubernetes distribution you are
+using is up to the standards of the community, in general.
+
+Large and diverse workloads can be difficult to track, so monitoring of usage is essential. Monitoring is about collecting key
+metrics such as CPU, memory, and disk usage, and network bandwidth on your nodes, as well as monitoring key metrics in
+your applications. These features are being been ingested into Kubernetes with the Metric Server, which a cut-down version
+of the now deprecated Heapster. Once installed the Metrics Server exposes a standard API which can be consumed by other
+agents such as autoscalers. Once installed this endpoint can be found here on the master server: /apis/metrics/k8s.io/
+Logging activity across all the nodes is another feature not part of Kubernetes. Using Fluentd can be a useful data collector
+for a unified logging layer. Having aggregated logs can help visualize the issue and provides the ability to search all logs.
+A good place to start when local network troubleshooting does not expose the root cause. It can be downloaded from
+http://www.fluentd.org
+Another project from cncf.io combines logging, monitoring, and alerting called Prometheus can be found here https:
+//prometheus.io. It provides a time-series database as well as integration with Grafana for visualization and dashboards.
+
+
+- See [Course Notes - chapter 11 - troubleshooting](course-notes/chapter11-troubleshooting.md)
+- See [Lab - chapter 11 - troubleshooting](labs/lab-11/lab_11.md)
+- See [Course Notes - chapter 12 - logging and troubleshooting](course-notes/chapter12-logging-troubleshooting.md)
+- See [Lab - chapter 12 - logging and troubleshooting](labs/lab-12/lab_12.md)
 
 
 ### Getting ready for exam
